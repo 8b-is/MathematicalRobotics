@@ -42,8 +42,9 @@ class GaussNewton:
         x_cur = x
         while(True):
             dx, score = self.solve_once(x_cur)
-            if (step > 0 and np.max(dx) > step):
-                dx = dx / np.max(dx) * step
+            max_abs_dx = np.max(np.abs(dx))
+            if (step > 0 and max_abs_dx > step):
+                dx = dx / max_abs_dx * step
 
             if (self.plus is None):
                 x_cur = x_cur + dx

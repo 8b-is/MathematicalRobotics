@@ -179,7 +179,7 @@ def expSO3(omega):
     nearZero = theta2 <= epsilon
     W = skew(omega)
     if (nearZero):
-        return np.eye(3) + W
+        return np.eye(3) + W + 0.5 * W.dot(W)
     else:
         K = W/theta
         KK = K.dot(K)
@@ -225,7 +225,7 @@ def logSO3(R):
             r = np.sqrt(Q3)         # 2 * r3
             one_over_r = 1 / r      # 1 / (2*r3)
             norm = np.sqrt(Q1*Q1 + Q2*Q2 + Q3*Q3 + W*W)  # 4*r3
-            sgn_w = np.sign(W)      # get the sgn of theta
+            sgn_w = -1.0 if W < 0 else 1.0  # preserve +1 at exact pi when W == 0
             mag = np.pi - (2 * sgn_w * W) / norm   # theta*sgn_w
             scale = 0.5 * mag * one_over_r  # theta * sgn_w / (4*r3)
             # omega = theta * [4*r1*r3, 4*r2*r3, 4*r3*r3]/ (4*r3)
@@ -239,7 +239,7 @@ def logSO3(R):
             r = np.sqrt(Q2)
             one_over_r = 1 / r
             norm = np.sqrt(Q1*Q1 + Q2*Q2 + Q3*Q3 + W*W)
-            sgn_w = np.sign(W)
+            sgn_w = -1.0 if W < 0 else 1.0
             mag = np.pi - (2 * sgn_w * W) / norm
             scale = 0.5 * one_over_r * mag
             omega = sgn_w * scale * np.array([Q1, Q2, Q3])
@@ -252,7 +252,7 @@ def logSO3(R):
             r = np.sqrt(Q1)
             one_over_r = 1 / r
             norm = np.sqrt(Q1*Q1 + Q2*Q2 + Q3*Q3 + W*W)
-            sgn_w = np.sign(W)
+            sgn_w = -1.0 if W < 0 else 1.0
             mag = np.pi - (2 * sgn_w * W) / norm
             scale = 0.5 * one_over_r * mag
             omega = sgn_w * scale * np.array([Q1, Q2, Q3])
@@ -261,7 +261,7 @@ def logSO3(R):
         tr_3 = tr - 3.0
         if (tr_3 < -1e-6):
             # this is the normal case -1 < trace < 3
-            theta = np.arccos((tr - 1.0) / 2.0)
+            theta = np.arccos(np.clip((tr - 1.0) / 2.0, -1.0, 1.0))
             magnitude = theta / (2.0 * np.sin(theta))
         else:
             # when theta near 0, +-2pi, +-4pi, etc. (trace near 3.0)
